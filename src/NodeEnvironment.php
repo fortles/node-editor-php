@@ -1,29 +1,41 @@
 <?php
-
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Scripting/PHPClass.php to edit this template
- */
-
-namespace NodeEditor;
+namespace Fortles\NodeEditor;
 
 /**
  * Description of NodeEnvironment
  *
  * @author Ivan
  */
-abstract class NodeEnvironment {
+class NodeEnvironment {
     public $outputs = [];
     public $connections;
     public $nodes;
     public $types = [];
     private $cycle = 0;
-    
+
+    protected $isInited = false;
     public $load = [];
+
+    protected $getData;
+    protected $setData;
+
+    public function __construct(\Closure $getDataCallback, \Closure $setDataCallback, array $types) {
+        $this->getData = $getDataCallback;
+        $this->setData = $setDataCallback;
+        foreach($types as $key => $value){
+            if(is_int($key)){
+                $this->types[$value] = '\Fortles\NodeEditor\Node\\'.$value;
+            }else{
+                $this->types[$key] = $value;
+            }
+        }
+    }
        
     function load(){
-        $json = $this->getData();
-        $data = [];
+        $json = ($this->getData)();
+        $data = [
+            'types' => []
+        ];
         if($json){
             $data = json_decode($json,true);
             $type = [];
@@ -52,10 +64,6 @@ abstract class NodeEnvironment {
         return $data;
     }
     
-    protected abstract function setData(string $data): void;
-   
-    protected abstract function getData();
-    
 
     function getType($name){
         $types = $this->types;
@@ -64,16 +72,16 @@ abstract class NodeEnvironment {
                 'editor' => $this,
                 'name' => ''
             ]);
-            return [self::DATA =>[
+            return [
                 'in'  => $n->in,
                 'out' => $n->out
-            ]];
+            ];
         }
     }
     
     protected function build(){
         //Load data
-        $data = json_decode($this->getData(),true);
+        $data = json_decode(($this->getData)(),true) ?? [];
         //Create nodes
         foreach ($data['nodes'] as $name => $node){
             new $this->types[$node['type']]([
@@ -94,7 +102,7 @@ abstract class NodeEnvironment {
         return $this->nodes[$name]->get($out);
     }
     public function saveUserData(){
-        $data = json_decode($this->getData(),true);
+        $data = json_decode(($this->getData)(),true);
         foreach ($this->nodes as $name => $node){
             if(isset($node->userData)){
                 $data['nodes'][$name]['userdata'] = $node->userData;
@@ -104,7 +112,7 @@ abstract class NodeEnvironment {
         if($json === false){
             throw new \Exception("Cant encode data");
         }
-        $this->setData($json);
+        ($this->setData)($json);
     }
     
     public function init(){
@@ -140,7 +148,7 @@ abstract class NodeEnvironment {
                 $node = $this->outputs[$node_name];
                 $node->calculate();
             }else{
-                throw new Exception("Node name '$node_name' not found");
+                throw new \Exception("Node name '$node_name' not found");
             }
         }else{
             foreach ($this->outputs as $node){
@@ -185,7 +193,7 @@ abstract class NodeEnvironment {
         }while($busy);
     }
     
-    public function getNode($name) : ?Node{
+    public function getNode($name): ?Node{
         if(empty($this->nodes)){
             $this->build();
         }

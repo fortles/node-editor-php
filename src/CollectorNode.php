@@ -1,5 +1,5 @@
 <?php
-namespace NodeEditor;
+namespace Fortles\NodeEditor;
 
 abstract class CollectorNode extends Node{
     protected $dynamicNode; //legközelebbi node, amit loopolunk

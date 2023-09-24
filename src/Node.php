@@ -1,5 +1,5 @@
 <?php
-namespace NodeEditor;
+namespace Fortles\NodeEditor;
 
 abstract class Node{
     //@var NodeEditorModule Holds the editor wich includes this node.

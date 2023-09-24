@@ -1,10 +1,7 @@
 <?php
-namespace NodeEditor\Node;
-
-use Cake\Http\Client;
-use Cake\Http\Client\Request;
+namespace Fortles\NodeEditor\Node;
 use Exception;
-use NodeEditor\Utility\OutputNode;
+use Fortles\NodeEditor\OutputNode;
 
 class HttpClientNode extends OutputNode{
     
@@ -12,8 +9,8 @@ class HttpClientNode extends OutputNode{
         'method' => [
             'type' => 'select',
             'values' => [
-                Request::METHOD_POST => 'POST',
-                Request::METHOD_GET  => 'GET',
+                'POST',
+                'GET',
             ]
         ],
         'fail' => [
@@ -34,12 +31,8 @@ class HttpClientNode extends OutputNode{
         'status'  => 'int',
         'success'  => 'bool'
     ];
-
-
-    private $client;
     
     public function init(array $inputs) {
-        $this->client = new Client();
         parent::init($inputs);
     }
     
@@ -54,26 +47,59 @@ class HttpClientNode extends OutputNode{
     }
 
     public function setData(array $inputs) {
+        $url = $inputs['url'];
+        $method = $inputs['method'];
         $headers = $inputs['headers'];
-        if(is_array($headers)){
-            $headers = $headers;
-        }else if(is_string($headers)){
-            $headers = explode(':',$headers);
-            $headers = [$headers[0] => $headers[1]];
-        }else{
-            $headers = [];
+        $body = $inputs['body'];
+    
+        $ch = curl_init();
+    
+        // Set cURL options
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+    
+        // Set headers
+        if(is_array($headers)) {
+            $headerArray = [];
+            foreach($headers as $key => $value) {
+                $headerArray[] = "{$key}: {$value}";
+            }
+            curl_setopt($ch, CURLOPT_HTTPHEADER, $headerArray);
+        } elseif(is_string($headers)) {
+            $headerParts = explode(':', $headers);
+            if(count($headerParts) === 2) {
+                curl_setopt($ch, CURLOPT_HTTPHEADER, [trim($headerParts[0]) . ': ' . trim($headerParts[1])]);
+            }
         }
-        $request = new Request($inputs['url'], $inputs['method'], $headers);
-        $request->body($inputs['body']);
-        $response = $this->client->send($request,['timeout' => 180]);
-        if($inputs['fail'] && !$response->isOk()){
-            throw new Exception((string)$response->getBody());
+    
+        // Set HTTP method and body
+        switch ($method) {
+            case 'POST':
+                curl_setopt($ch, CURLOPT_POST, 1);
+                curl_setopt($ch, CURLOPT_POSTFIELDS, $body);
+                break;
+            case 'GET':
+                curl_setopt($ch, CURLOPT_HTTPGET, 1);
+                break;
+            // Add other HTTP methods as needed
         }
+    
+        $responseBody = curl_exec($ch);
+        $responseCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    
+        $success = $responseCode >= 200 && $responseCode < 300;
+    
+        if ($inputs['fail'] && !$success) {
+            throw new Exception($responseBody);
+        }
+    
         $this->outputBuffer = [
-            'status' => $response->getStatusCode(),
-            'headers' => $response->getHeaders(),
-            'body' => $response->getBody(),
-            'success' => $response->isOk()
+            'status' => $responseCode,
+            'headers' => [], // cURL doesn't parse headers by default, you might want to extract them separately
+            'body' => $responseBody,
+            'success' => $success
         ];
-    }
+    
+        curl_close($ch);
+    }    
 }

@@ -3,7 +3,7 @@ namespace Loader\Utility\Model;
 class CacheModel{
     static function cache($source, $target, $timeout, $callback = null){
         if(!$time_out = strtotime($timeout.' UTC',0)){
-            throw new Exception("Wrong timeout format");
+            throw new \Exception("Wrong timeout format");
         }
         /*
         $extension = pathinfo($target,PATHINFO_EXTENSION);

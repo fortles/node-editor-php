@@ -1,6 +1,7 @@
 {
     "name": "fortles/node-editor",
     "description": "Node editor backend",
+    "version": "1.0.0",
     "type": "library",
     "license": "GNU",
     "autoload": {
@@ -10,7 +11,7 @@
     },
     "authors": [
         {
-            "name": "Barták Iván",
+            "name": "Iván Barták",
             "email": "ivan@fortles.com"
         }
     ],

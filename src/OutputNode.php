@@ -1,5 +1,5 @@
 <?php
-namespace NodeEditor;
+namespace Fortles\NodeEditor;
 
 abstract class OutputNode extends Node{
     protected $lastData;

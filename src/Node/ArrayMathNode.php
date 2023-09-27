@@ -16,7 +16,7 @@ class ArrayMathNode extends Node{
         'result' => 'number'
     ];
     public function method(array $inputs) {
-        if(!is_array($inputs['array'])){
+        if(empty($inputs['array']) || !is_array($inputs['array'])){
             return ['result' => null];
         }
         switch ($inputs['operation']){

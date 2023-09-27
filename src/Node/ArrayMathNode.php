@@ -1,6 +1,6 @@
 <?php
-namespace Loader\Utility\Node;
-use essentials\addon\NodeEditor\Node;
+namespace Fortles\NodeEditor\Node;
+use Fortles\NodeEditor\Node;
 
 class ArrayMathNode extends Node{
     public $in = [

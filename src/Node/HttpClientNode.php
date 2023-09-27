@@ -1,9 +1,9 @@
 <?php
 namespace Fortles\NodeEditor\Node;
 use Exception;
-use Fortles\NodeEditor\OutputNode;
+use Fortles\NodeEditor\Node;
 
-class HttpClientNode extends OutputNode{
+class HttpClientNode extends Node{
     
     public $in = [
         'method' => [
@@ -37,16 +37,11 @@ class HttpClientNode extends OutputNode{
     }
     
     public function method(array $inputs) {
-        //Dummy output for init
-        return [
-            'status' => 200,
-            'headers' => [],
-            'body' => '',
-            'success' => true
-        ];
+        //TODO POST with get data
+        return $this->fetch($inputs);
     }
 
-    public function setData(array $inputs) {
+    public function fetch(array $inputs) {
         $url = $inputs['url'];
         $method = $inputs['method'];
         $headers = $inputs['headers'];
@@ -93,13 +88,13 @@ class HttpClientNode extends OutputNode{
             throw new Exception($responseBody);
         }
     
-        $this->outputBuffer = [
+        curl_close($ch);
+
+        return [
             'status' => $responseCode,
             'headers' => [], // cURL doesn't parse headers by default, you might want to extract them separately
             'body' => $responseBody,
             'success' => $success
         ];
-    
-        curl_close($ch);
     }    
 }

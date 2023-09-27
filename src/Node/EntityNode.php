@@ -1,7 +1,7 @@
 <?php
-namespace Loader\Utility\Node;
-use essentials\addon\NodeEditor\Node;
-use \Cake\ORM\TableRegistry;
+namespace Fortles\NodeEditor\Node;
+
+use Fortles\NodeEditor\Node;
 
 class EntityNode extends Node{
     

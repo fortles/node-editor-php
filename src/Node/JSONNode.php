@@ -1,10 +1,9 @@
 <?php
+namespace Fortles\NodeEditor\Node;
 
-namespace Loader\Utility\Node;
+use Fortles\NodeEditor\Node;
 
-use essentials\addon\NodeEditor\Node;
-
-class JSONNode extends Node
+class JsonNode extends Node
 {
 
     public $in = [
@@ -24,6 +23,7 @@ class JSONNode extends Node
 
     public function method(array $inputs)
     {
+        $inputs['input'] = @iconv( 'UTF-16', 'UTF-8', $inputs['input']);
         switch ($inputs['direction']) {
             case 0:
                 return ['output' => is_array($inputs['input']) ?  json_encode($inputs['input'], JSON_FORCE_OBJECT) : json_encode($inputs['input'])];

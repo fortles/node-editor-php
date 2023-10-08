@@ -62,7 +62,7 @@ abstract class Node{
                             return $stopColor;
                         }
                     }
-                    $this->inputBuffer[$key] = $connected->outputBuffer[$this->connections[$key][1]];
+                    $this->inputBuffer[$key] = $connected->outputBuffer[$this->connections[$key][1]] ?? null;
                 }else{
                     $this->inputBuffer[$key] = isset($this->values[$key]) ? $this->values[$key] : null;
                 }

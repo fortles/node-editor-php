@@ -63,7 +63,6 @@ class NodeEnvironment {
         $data['add'] = array_keys($this->types);
         return $data;
     }
-    
 
     function getType($name){
         $types = $this->types;

@@ -2,7 +2,7 @@
 namespace Loader\Utility\Node;
 use essentials\addon\NodeEditor\OutputNode;
 
-class JSONOutputNode extends OutputNode{
+class JsonOutputNode extends OutputNode{
     
     public $in = [
         'json' => 'object'

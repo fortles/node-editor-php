@@ -13,11 +13,11 @@ abstract class OutputNode extends Node{
         }
         $stopColor = parent::calculate($cycle);
         if($stopColor === null && isset($cycle)){
-            $this->lastData = $this->setData($this->inputBuffer, $this->outputBuffer);
+            $this->lastData = $this->setData($this->inputBuffer);
         }
         return $stopColor;
     }
-    abstract function setData(array $inputs, array $outputs = null);
+    abstract function setData(array $inputs);
     public function getData(){
         return $this->lastData;
     }

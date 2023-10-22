@@ -211,8 +211,19 @@ abstract class Node{
             }
         }
     }
+
     public function reset(){
         $this->cycle = -1;
+    }
+
+    /**
+     * Returns a config value form the environment or a default if not provided.
+     * The config can be set on the environment, in the constructor or with the setConfig of the constructor.
+     * @param string $key Name of the config
+     * @param mixed $default The default value if config has no value, when not provided its null.
+     */
+    public function getConfig(string $key, $default = null){
+        return $this->editor->getConfig($key, $default);
     }
 }
 

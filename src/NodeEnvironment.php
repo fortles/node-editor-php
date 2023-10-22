@@ -19,9 +19,23 @@ class NodeEnvironment {
     protected $getData;
     protected $setData;
 
-    public function __construct(\Closure $getDataCallback, \Closure $setDataCallback, array $types) {
+    protected $config = [];
+
+    protected $inputData = [];
+
+    /**
+     * Creates a new node environment
+     * @param \Closure $getDataCallback This function will be called, when the environment need to read data to from persistent storage. The loading logic must be defined here.
+     * @param \Closure $setDataCallback  This function will be called, when the environment need to save data to the persistent storage. The saving logic must be defined here.
+     * @param array $types An associative list of name and type classes like so: `['Math' => MathNode::class]`
+     * @param array $config Values bound to the node editor. configs can be read on the nodes as well.
+     * @param array $inputData Initial value for input data. This is good to give a shape of the data for the input node.
+     */
+    public function __construct(\Closure $getDataCallback, \Closure $setDataCallback, array $types, array $config = [], array $inputData = []) {
         $this->getData = $getDataCallback;
         $this->setData = $setDataCallback;
+        $this->config = $config;
+        $this->inputData = $inputData;
         foreach($types as $key => $value){
             if(is_int($key)){
                 $this->types[$value] = '\Fortles\NodeEditor\Node\\'.$value;
@@ -140,7 +154,8 @@ class NodeEnvironment {
         $this->cycle = 0;
     }
 
-    public function test($node_name = null){
+    public function test(array $data = [], string $node_name = null){
+        $this->inputData = $data;
         $this->init();
         if(isset($node_name)){
             if(isset($this->outputs[$node_name])){
@@ -156,17 +171,39 @@ class NodeEnvironment {
         }
     }
     
-    public function next($node_name){
-        if(isset($node_name)){
-            $node = $this->nodes[$node_name];
+    /**
+     * Calculates the next step
+     * @param string $nodeName If given the next step will calculated for that node only.
+     * @return mixed Return the result of the selected node, or true if no `$nodeName` given. False if there is no new step available.
+     */
+    public function next(array $data, string $nodeName = null){
+        $this->inputData = $data;
+        if(!$this->isInited()){
+            $this->init();
+        }
+        if(isset($nodeName)){
+            $node = $this->nodes[$nodeName];
             if($node->calculate($this->cycle++) === null){
                 return $node->getData();
             }else{
                 return false;
             }
+        }else{
+            $busy = false;
+            foreach ($this->outputs as $node){
+                if($node->color === 0 && $cycle === 0){
+                    $node->calculate($cycle);
+                }else if($node->color > 0){
+                    if($node->calculate($cycle) !== false){
+                        $busy = true;
+                    }
+                }
+            }
+            return $busy;
         }
     }
-    public function run(){
+    public function run(array $data = []){
+        $this->inputData = $data;
         if($this->cycle == 0){
             $this->init();
         }else{
@@ -201,5 +238,29 @@ class NodeEnvironment {
     
     public function isInited(){
         return $this->isInited;
+    }
+
+    /**
+     * Returns a config value, or a default if not provided
+     * @param string $key Name of the config
+     * @param mixed $default The default value if config has no value, when not provided its null.
+     */
+    public function getConfig(string $key, $default = null){
+        return $this->config['key'] ?? $default;
+    }
+
+    /**
+     * Sets a configuration with a given key
+     * @param string $key key of the configuration
+     */
+    public function setConfig(string $key, $value){
+        return $this->config[$key] = $value;
+    }
+
+    /** 
+     * Returns the data set for the current cycle.
+     * */
+    public function getInputData(){
+        return $this->inputData;
     }
 }

@@ -59,7 +59,7 @@ class NodeEnvironment {
                         throw new \Exception('There is no type definition for "'.$nodeData['type'].'"');
                     }
                     $node = new $this->types[$nodeData['type']]([
-                        'editor' => $this,
+                        'environment' => $this,
                         'name' => $name,
                         'userdata' => isset($nodeData['userdata']) ? $nodeData['userdata'] : null
                     ]);
@@ -82,7 +82,7 @@ class NodeEnvironment {
         $types = $this->types;
         if(isset($types[$name])){
             $n = new $types[$name]([
-                'editor' => $this,
+                'environment' => $this,
                 'name' => ''
             ]);
             return [
@@ -98,7 +98,7 @@ class NodeEnvironment {
         //Create nodes
         foreach ($data['nodes'] as $name => $node){
             new $this->types[$node['type']]([
-                'editor' => $this,
+                'environment' => $this,
                 'name' => $name,
                 'userdata' => isset($node['userdata']) ? $node['userdata'] : null
             ]);

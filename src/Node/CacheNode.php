@@ -113,7 +113,7 @@ class LoaderCacheNode extends CacheNode{
         'File' => 'filename'
     ];
     public function __construct($data){
-        $path = $data['editor']->id;
+        $path = $data['environment']->id;
         parent::__construct($data, $path);
     }
 }

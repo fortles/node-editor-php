@@ -22,17 +22,17 @@ abstract class Node{
     public $cycle = 0;
     private $dirtyUserData = false;
     function __construct(array $data) {
-        $this->editor = $data['editor'];
+        $thisenvironment = $data['environment'];
         $this->name = isset($data['name']) ? $data['name'] : null;
         $this->userData = isset($data['userdata']) ? $data['userdata'] : null;
-        if(!isset($this->editor->nodes[$this->name])){
-            $this->editor->nodes[$this->name] = $this;
+        if(!isset($thisenvironment->nodes[$this->name])){
+            $thisenvironment->nodes[$this->name] = $this;
         }
     }
     function __destruct() {
         if($this->dirtyUserData){
-            $this->editor->nodes[$this->name] = $this;
-            $this->editor->saveUserData();
+            $thisenvironment->nodes[$this->name] = $this;
+            $thisenvironment->saveUserData();
         }
     }
 
@@ -89,9 +89,9 @@ abstract class Node{
         $this->color = $this instanceof  DynamicNodeInterface ? 1 : 0;
         if(isset($this->in)){
             foreach ($this->in as  $key => $type){
-                if(isset($this->editor->connections[$this->name],$this->editor->connections[$this->name][$key])){
-                    $connection = $this->editor->connections[$this->name][$key];
-                    $connected = $this->editor->nodes[$connection[0]];
+                if(isset($thisenvironment->connections[$this->name],$thisenvironment->connections[$this->name][$key])){
+                    $connection = $thisenvironment->connections[$this->name][$key];
+                    $connected = $thisenvironment->nodes[$connection[0]];
                     $connected->connectedOut[$connection[1]] = true;
                     $connected->prepare();
                     $this->connections[$key] = [$connected, $connection[1]];
@@ -112,7 +112,7 @@ abstract class Node{
         }
         $this->init($this->inputBuffer);
         $this->outputBuffer = $this->method($this->inputBuffer);
-        $this->editor->colors[$this->color] []= $this;
+        $thisenvironment->colors[$this->color] []= $this;
         return $this->dirtyUserData;
     }
     function setUserData($key, $value){
@@ -141,7 +141,7 @@ abstract class Node{
     }
     function view($data) {
         try{
-            $this->editor->init();
+            $thisenvironment->init();
         }catch(Exception $ex){
             
         }
@@ -193,18 +193,18 @@ abstract class Node{
         if($this->connections){
             return $this->connections[$input][0] ?? null;
         }else{
-             $connection = $this->editor->connections[$this->name][$input] ?? null;
+             $connection = $thisenvironment->connections[$this->name][$input] ?? null;
              if(!empty($connection)){
-                return $this->editor->nodes[$connection[0]] ?? null;
+                return $thisenvironment->nodes[$connection[0]] ?? null;
              }
         }
     }
     
     public function backPropagate($callable){
-        $connections = $this->editor->connections[$this->name] ?? null;
+        $connections = $thisenvironment->connections[$this->name] ?? null;
         if(!empty($connections)){
             foreach($connections as $connection){
-                $connectedNode = $this->editor->nodes[$connection[0]];
+                $connectedNode = $thisenvironment->nodes[$connection[0]];
                 if($callable($connectedNode) !== false){
                     $connectedNode->backPropagate($callable);
                 }
@@ -223,7 +223,7 @@ abstract class Node{
      * @param mixed $default The default value if config has no value, when not provided its null.
      */
     public function getConfig(string $key, $default = null){
-        return $this->editor->getConfig($key, $default);
+        return $thisenvironment->getConfig($key, $default);
     }
 }
 

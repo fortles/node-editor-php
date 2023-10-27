@@ -22,7 +22,7 @@ class SoapActionNode extends Node{
     public function method(array $inputs) {
         if(isset($this->soap, $this->action)){
             //cache response
-            $path = CacheModel::cache($this->soap->getUrl(),"input/{$thisenvironment->id}/$this->name/Data", $inputs['Timeout'], function($source, $target)use($inputs){
+            $path = CacheModel::cache($this->soap->getUrl(),"input/{$this->environment->id}/$this->name/Data", $inputs['Timeout'], function($source, $target)use($inputs){
                 if($this->stream){
                     $this->soap->callStream($target, $this->action, $inputs);
                 }else{
@@ -72,7 +72,7 @@ class SoapActionNode extends Node{
     ];
     public function edit($label, $action = null,$stream = null) {
         try{
-            $thisenvironment->init();
+            $this->environment->init();
         } catch (Exception $ex) {
 
         }

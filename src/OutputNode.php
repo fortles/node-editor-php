@@ -5,7 +5,7 @@ abstract class OutputNode extends Node{
     protected $lastData;
     public function __construct(array $data) {
         parent::__construct($data);
-        $thisenvironment->outputs[$this->name] = $this;
+        $this->environment->outputs[$this->name] = $this;
     }
     public function calculate($cycle = null) {
         if($cycle === $this->cycle){

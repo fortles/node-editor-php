@@ -3,7 +3,7 @@ namespace Fortles\NodeEditor;
 
 abstract class Node{
     //@var NodeEditorModule Holds the editor wich includes this node.
-    protected $editor;
+    private NodeEnvironment $environment;
     //@var array values The values used if the input is not cennected.
     public $values;
     //@var string name The name of the node.
@@ -22,17 +22,17 @@ abstract class Node{
     public $cycle = 0;
     private $dirtyUserData = false;
     function __construct(array $data) {
-        $thisenvironment = $data['environment'];
+        $this->environment = $data['environment'];
         $this->name = isset($data['name']) ? $data['name'] : null;
         $this->userData = isset($data['userdata']) ? $data['userdata'] : null;
-        if(!isset($thisenvironment->nodes[$this->name])){
-            $thisenvironment->nodes[$this->name] = $this;
+        if(!isset($this->environment->nodes[$this->name])){
+            $this->environment->nodes[$this->name] = $this;
         }
     }
     function __destruct() {
         if($this->dirtyUserData){
-            $thisenvironment->nodes[$this->name] = $this;
-            $thisenvironment->saveUserData();
+            $this->environment->nodes[$this->name] = $this;
+            $this->environment->saveUserData();
         }
     }
 
@@ -89,9 +89,9 @@ abstract class Node{
         $this->color = $this instanceof  DynamicNodeInterface ? 1 : 0;
         if(isset($this->in)){
             foreach ($this->in as  $key => $type){
-                if(isset($thisenvironment->connections[$this->name],$thisenvironment->connections[$this->name][$key])){
-                    $connection = $thisenvironment->connections[$this->name][$key];
-                    $connected = $thisenvironment->nodes[$connection[0]];
+                if(isset($this->environment->connections[$this->name],$this->environment->connections[$this->name][$key])){
+                    $connection = $this->environment->connections[$this->name][$key];
+                    $connected = $this->environment->nodes[$connection[0]];
                     $connected->connectedOut[$connection[1]] = true;
                     $connected->prepare();
                     $this->connections[$key] = [$connected, $connection[1]];
@@ -112,7 +112,7 @@ abstract class Node{
         }
         $this->init($this->inputBuffer);
         $this->outputBuffer = $this->method($this->inputBuffer);
-        $thisenvironment->colors[$this->color] []= $this;
+        $this->environment->colors[$this->color] []= $this;
         return $this->dirtyUserData;
     }
     function setUserData($key, $value){
@@ -141,7 +141,7 @@ abstract class Node{
     }
     function view($data) {
         try{
-            $thisenvironment->init();
+            $this->environment->init();
         }catch(Exception $ex){
             
         }
@@ -193,18 +193,18 @@ abstract class Node{
         if($this->connections){
             return $this->connections[$input][0] ?? null;
         }else{
-             $connection = $thisenvironment->connections[$this->name][$input] ?? null;
+             $connection = $this->environment->connections[$this->name][$input] ?? null;
              if(!empty($connection)){
-                return $thisenvironment->nodes[$connection[0]] ?? null;
+                return $this->environment->nodes[$connection[0]] ?? null;
              }
         }
     }
     
     public function backPropagate($callable){
-        $connections = $thisenvironment->connections[$this->name] ?? null;
+        $connections = $this->environment->connections[$this->name] ?? null;
         if(!empty($connections)){
             foreach($connections as $connection){
-                $connectedNode = $thisenvironment->nodes[$connection[0]];
+                $connectedNode = $this->environment->nodes[$connection[0]];
                 if($callable($connectedNode) !== false){
                     $connectedNode->backPropagate($callable);
                 }
@@ -223,7 +223,11 @@ abstract class Node{
      * @param mixed $default The default value if config has no value, when not provided its null.
      */
     public function getConfig(string $key, $default = null){
-        return $thisenvironment->getConfig($key, $default);
+        return $this->environment->getConfig($key, $default);
+    }
+
+    public function getEnvironment() : NodeEnvironment {
+        return $this->environment;
     }
 }
 

@@ -32,8 +32,8 @@ class ExportInputNode extends Node implements DynamicNodeInterface{
 
 
     public function init(array $inputs) {
-        $this->exportEntity = $thisenvironment->exportEntity;
-        $where = array_merge(['CarExportMycars.car_export_id' => $this->exportEntity->id], $thisenvironment->exportCondition ?? []);
+        $this->exportEntity = $this->environment->exportEntity;
+        $where = array_merge(['CarExportMycars.car_export_id' => $this->exportEntity->id], $this->environment->exportCondition ?? []);
         $this->carsQuery = TableRegistry::get('Car.CarMycars')->find()
             ->where($where)
             ->contain([

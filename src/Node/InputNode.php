@@ -6,10 +6,10 @@ use Fortles\NodeEditor\Node;
 
 class InputNode extends Node implements DynamicNodeInterface{
     function __construct(array $data){
-        $this->out = $thisenvironment->inputData;
         parent::__construct($data);
+        $this->out = $this->getEnvironment()->getInputData();
     }
     function method(array $inputs){
-        return $thisenvironment->inputData;
+        return $this->getEnvironment()->getInputData();
     }
 }

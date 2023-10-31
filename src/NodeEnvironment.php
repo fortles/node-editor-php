@@ -7,6 +7,7 @@ namespace Fortles\NodeEditor;
  * @author Ivan
  */
 class NodeEnvironment {
+    /** @var OutputNode[] */
     public $outputs = [];
     public $connections;
     public $nodes;
@@ -38,7 +39,7 @@ class NodeEnvironment {
         $this->inputData = $inputData;
         foreach($types as $key => $value){
             if(is_int($key)){
-                $this->types[$value] = '\Fortles\NodeEditor\Node\\'.$value;
+                $this->types[substr($value, strrpos($value, '\\') + 1, -strlen('Node'))] = $value;
             }else{
                 $this->types[$key] = $value;
             }
@@ -154,15 +155,15 @@ class NodeEnvironment {
         $this->cycle = 0;
     }
 
-    public function test(array $data = [], string $node_name = null){
+    public function test(array $data = [], string $nodeName = null){
         $this->inputData = $data;
         $this->init();
-        if(isset($node_name)){
-            if(isset($this->outputs[$node_name])){
-                $node = $this->outputs[$node_name];
+        if(isset($nodeName)){
+            if(isset($this->outputs[$nodeName])){
+                $node = $this->outputs[$nodeName];
                 $node->calculate();
             }else{
-                throw new \Exception("Node name '$node_name' not found");
+                throw new \Exception("Node name '$nodeName' not found");
             }
         }else{
             foreach ($this->outputs as $node){
@@ -176,8 +177,10 @@ class NodeEnvironment {
      * @param string $nodeName If given the next step will calculated for that node only.
      * @return mixed Return the result of the selected node, or true if no `$nodeName` given. False if there is no new step available.
      */
-    public function next(array $data, string $nodeName = null){
-        $this->inputData = $data;
+    public function next(array $data = null, string $nodeName = null){
+        if($data != null){
+            $this->inputData = $data;
+        }
         if(!$this->isInited()){
             $this->init();
         }
@@ -262,5 +265,36 @@ class NodeEnvironment {
      * */
     public function getInputData(){
         return $this->inputData;
+    }
+
+    /**
+     * Returns the ouput data for a given output node
+     */
+    public function getOutputData(string $nodeName){
+        return $this->outputs[$nodeName]->getData() ?? null;
+    }
+
+    /**
+     * Reutrns an iterable for all of the nodes
+     */
+    public function getAllOuputData(){
+        foreach($this->outputs as $name => $node){
+            yield $name => $node->getData();
+        }
+    }
+
+    /**
+     * Returns an ouput node.
+     */
+    public function getOuputNode(string $nodeName){
+        return $this->outputs[$nodeName] ?? null;
+    }
+
+    /**
+     * Returns all ouput node.
+     * @return OutputNode[]
+     */
+    public function getAllOuputNode(){
+        return $this->outputs;
     }
 }

@@ -1,5 +1,6 @@
 <?php
 namespace Fortles\NodeEditor;
+use Fortles\NodeEditor\Exception\NodeEnvironmentException;
 
 /**
  * Description of NodeEnvironment
@@ -174,10 +175,11 @@ class NodeEnvironment {
     
     /**
      * Calculates the next step
+     * @param mixed $data Input data for the node
      * @param string $nodeName If given the next step will calculated for that node only.
      * @return mixed Return the result of the selected node, or true if no `$nodeName` given. False if there is no new step available.
      */
-    public function next(array $data = null, string $nodeName = null){
+    public function next($data = null, string $nodeName = null){
         if($data != null){
             $this->inputData = $data;
         }
@@ -194,10 +196,10 @@ class NodeEnvironment {
         }else{
             $busy = false;
             foreach ($this->outputs as $node){
-                if($node->color === 0 && $cycle === 0){
-                    $node->calculate($cycle);
+                if($node->color === 0 && $this->cycle === 0){
+                    $node->calculate($this->cycle);
                 }else if($node->color > 0){
-                    if($node->calculate($cycle) !== false){
+                    if($node->calculate($this->cycle) !== false){
                         $busy = true;
                     }
                 }
@@ -270,31 +272,39 @@ class NodeEnvironment {
     /**
      * Returns the ouput data for a given output node
      */
-    public function getOutputData(string $nodeName){
-        return $this->outputs[$nodeName]->getData() ?? null;
+    public function getOutputData(string $nodeName): array{
+        return $this->getOuputNode($nodeName)->getData();
     }
 
     /**
      * Reutrns an iterable for all of the nodes
+     * @return \Generator<array<array>>
      */
-    public function getAllOuputData(){
+    public function getAllOuputData(string $type = null): \Generator{
         foreach($this->outputs as $name => $node){
-            yield $name => $node->getData();
+            if(!isset($type) || $node instanceof $type){
+                yield $name => $node->getData();
+            }
         }
     }
 
     /**
-     * Returns an ouput node.
+     *  Returns an ouput node.
+     * @param string $nodeName Name of the requested node
+     * @throws NodeEnvironmentException If the node does not exists
      */
-    public function getOuputNode(string $nodeName){
-        return $this->outputs[$nodeName] ?? null;
+    public function getOuputNode(string $nodeName): OutputNode{
+        if(!isset($this->outputs[$nodeName])){
+            throw new NodeEnvironmentException('Node "' . $nodeName .'" does not exists');
+        }
+        return $this->outputs[$nodeName];
     }
 
     /**
      * Returns all ouput node.
      * @return OutputNode[]
      */
-    public function getAllOuputNode(){
+    public function getAllOuputNode(): array{
         return $this->outputs;
     }
 }

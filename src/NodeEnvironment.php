@@ -14,15 +14,11 @@ class NodeEnvironment {
     public $nodes;
     public $types = [];
     private $cycle = 0;
-
     protected $isInited = false;
     public $load = [];
-
     protected $getData;
     protected $setData;
-
     protected $config = [];
-
     protected $inputData = [];
 
     /**
@@ -197,9 +193,9 @@ class NodeEnvironment {
             $busy = false;
             foreach ($this->outputs as $node){
                 if($node->color === 0 && $this->cycle === 0){
-                    $node->calculate($this->cycle);
+                    $node->calculate($this->cycle++);
                 }else if($node->color > 0){
-                    if($node->calculate($this->cycle) !== false){
+                    if($node->calculate($this->cycle++) !== false){
                         $busy = true;
                     }
                 }

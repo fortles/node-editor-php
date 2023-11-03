@@ -1,7 +1,8 @@
 <?php
 
-namespace NodeEditor\Node;
-use essentials\addon\NodeEditor\Node;
+
+namespace Fortles\NodeEditor\Node;
+use Fortles\NodeEditor\Node;
 class LogicNode extends Node{
     public $in = [
         'Operation' => [
@@ -28,7 +29,11 @@ class LogicNode extends Node{
             case 3 : $c = $a >  $b; break;
             case 4 : $c = $a >= $b; break;
         }
-        return ['Result' => $c ? $inputs['True'] : $inputs['False']];
+        if(!isset($inputs['True']) && !isset($inputs['False'])){
+            return ['Result' => $c];
+        }else{
+            return ['Result' => $c ? $inputs['True'] : $inputs['False']];
+        }
     }
 }
 

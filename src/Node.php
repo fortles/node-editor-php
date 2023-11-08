@@ -229,6 +229,10 @@ abstract class Node{
     public function getEnvironment() : NodeEnvironment {
         return $this->environment;
     }
+
+    public function getOutputBuffer(){
+        return $this->outputBuffer;
+    }
 }
 
 class ArrayNode extends Node{

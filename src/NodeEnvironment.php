@@ -11,6 +11,7 @@ class NodeEnvironment {
     /** @var OutputNode[] */
     public $outputs = [];
     public $connections;
+    /** @var Node[] */
     public $nodes;
     public $types = [];
     private $cycle = 0;
@@ -20,6 +21,8 @@ class NodeEnvironment {
     protected $setData;
     protected $config = [];
     protected $inputData = [];
+
+    protected $testDataMaxLength = 128;
 
     /**
      * Creates a new node environment
@@ -152,21 +155,63 @@ class NodeEnvironment {
         $this->cycle = 0;
     }
 
-    public function test(array $data = [], string $nodeName = null){
+    public function test(array $data = [], bool $saveTestData = true){
         $this->inputData = $data;
         $this->init();
-        if(isset($nodeName)){
-            if(isset($this->outputs[$nodeName])){
-                $node = $this->outputs[$nodeName];
-                $node->calculate();
-            }else{
-                throw new \Exception("Node name '$nodeName' not found");
-            }
-        }else{
-            foreach ($this->outputs as $node){
-                $node->calculate();
+        foreach ($this->outputs as $node){
+            $node->calculate();
+        }
+        $data = json_decode(($this->getData)(),true);
+        $data['test'] = $this->createSnapshot();
+        $json = json_encode($data);
+        if($json === false){
+            throw new \Exception("Cant encode data");
+        }
+        ($this->setData)($json);
+    }
+
+    /**
+     * Captures the output biffer of all the nodes.
+     * The data will be limited by the `$testDataMaxLength` attrubute.
+     */
+    public function createSnapshot(){
+        $result = [];
+        foreach($this->nodes as $name => $node){
+            $result[$name] = [];
+            foreach($node->getOutputBuffer() ?? [] as $key => $value){
+                $stringValue = $this->convertToJsonFriendly($value);
+                $isTrimmed = false;
+                if(strlen($stringValue) > $this->testDataMaxLength){
+                    $isTrimmed = true;
+                    $stringValue = substr($stringValue, 0, $this->testDataMaxLength);
+                }
+                $result[$name][$key] = [
+                    'isTrimmed' => $isTrimmed,
+                    'value' => $stringValue
+                ];
             }
         }
+        return $result;
+    }
+
+    function convertToJsonFriendly($value) {
+        if (is_string($value)) {
+            // Only use the first 1000 characters of the string for detection to save on performance.
+            $detected_encoding = mb_detect_encoding($value, mb_detect_order(), true);
+            if ($detected_encoding && $detected_encoding !== 'UTF-8') {
+                $value = mb_convert_encoding($value, 'UTF-8', $detected_encoding);
+            } elseif (!$detected_encoding) {
+                // If no encoding is detected, handle as unknown encoding
+                return 'Unknown or binary encoding';
+            }
+            return $value;
+        }
+        if (is_scalar($value) || is_null($value)) return $value;   
+        if (is_array($value)) return implode(', ', array_map([$this, 'convertToJsonFriendly'], $value));
+        if ($value instanceof DateTime) return $value->format(\DateTime::ISO8601);
+        if (is_object($value)) return method_exists($value, '__toString') ? (string) $value : serialize($value);
+        if (is_resource($value)) return get_resource_type($value);
+        return (string) $value; // Fallback for other types
     }
     
     /**

@@ -136,56 +136,7 @@ abstract class Node{
     function setOut($out){
         $this->setUserData('out', $out);
     }
-    function toView(){
-        return ['data'=>null];
-    }
-    function view($data) {
-        try{
-            $this->environment->init();
-        }catch(Exception $ex){
-            
-        }
-        echo "<h1>Edit $this->name</h1><form class='e-form-underline'";
-        $this->userViewInit();
-        Html::form('edit');
-        echo '/>';
-        $this->userView();
-        echo '<div class="e-action-bar" >';
-        Html::button('<i class="fa fa-floppy-o e-button-icon"></i>');
-        echo '</div>';
-        echo '</form>';
-        $this->userViewDebug();
-    }
     
-    protected function userViewDebug(){
-        echo "<h2>Debug</h2>";
-        echo "<h3>Inputs</h3>";
-        Html::dl($this->inputBuffer, null, function($data){return "<pre>$data</pre>";});
-        echo "<h3>Outpus</h3>";
-        Html::dl($this->outputBuffer, null, function($data){return "<pre>$data</pre>";});
-    }
-    
-    function userViewInit(){
-        $this->edit['label']['default'] = $this->getUserData('label');
-    }
-    function userView(){
-        Html::input('label','placeholder="label"');
-    }
-
-    public $edit = [
-        'label' => [
-            'filter' => FILTER_SANITIZE_STRING
-        ]
-    ];
-    function edit($label){
-        if($label){
-            $this->setUserData('label', $label);
-        }
-        return [
-            self::FEEDBACK_DONE => 'Saved!',
-            self::GO => '../'
-        ];
-    }
     function getName(){
         return $this->name;
     }

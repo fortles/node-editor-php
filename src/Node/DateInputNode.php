@@ -16,7 +16,7 @@ class DateInputNode extends Node{
     ];
     public function method(array $inputs)
     {
-        $date = \DateTime();
+        $date = new \DateTime();
         $date->setDate($inputs['year'], $inputs['month'], $inputs['day']);
         $date->setTime($inputs['hour'] ?? 0, $inputs['minute'] ?? 0, $inputs['second'] ?? 0);
         return ['date' => $date];

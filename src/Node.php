@@ -14,6 +14,7 @@ abstract class Node{
     public $color = false;
     public $in = [];
     public $out = [];
+    protected $description = '';
     public $connectedOut = [];
     protected $inputBuffer = [];
     protected $outputBuffer = [];
@@ -183,6 +184,10 @@ abstract class Node{
 
     public function getOutputBuffer(){
         return $this->outputBuffer;
+    }
+
+    public function getDescription(){
+        return $this->description;
     }
 }
 

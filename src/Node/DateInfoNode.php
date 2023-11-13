@@ -16,35 +16,35 @@ class DateInfoNode extends Node{
         'season' => 'string'
     ];
     public function method(array $inputs)
-{
-    $date = new \DateTime($inputs['date']);
+    {
+        $date = new \DateTime($inputs['date']);
 
-    $year = (int) $date->format('Y');
-    $month = (int) $date->format('m');
-    $day = (int) $date->format('d');
-    $hour = (int) $date->format('H');
-    $minutes = (int) $date->format('i');
-    $seconds = (int) $date->format('s');
+        $year = (int) $date->format('Y');
+        $month = (int) $date->format('m');
+        $day = (int) $date->format('d');
+        $hour = (int) $date->format('H');
+        $minutes = (int) $date->format('i');
+        $seconds = (int) $date->format('s');
 
-    $season = '';
-    if ($month >= 3 && $month <= 5) {
-        $season = 'Spring';
-    } elseif ($month >= 6 && $month <= 8) {
-        $season = 'Summer';
-    } elseif ($month >= 9 && $month <= 11) {
-        $season = 'Autumn';
-    } else {
-        $season = 'Winter';
+        $season = '';
+        if ($month >= 3 && $month <= 5) {
+            $season = 'Spring';
+        } elseif ($month >= 6 && $month <= 8) {
+            $season = 'Summer';
+        } elseif ($month >= 9 && $month <= 11) {
+            $season = 'Autumn';
+        } else {
+            $season = 'Winter';
+        }
+
+        return [
+            'year' => $year,
+            'month' => $month,
+            'day' => $day,
+            'hour' => $hour,
+            'minutes' => $minutes,
+            'seconds' => $seconds,
+            'season' => $season
+        ];
     }
-
-    return [
-        'year' => $year,
-        'month' => $month,
-        'day' => $day,
-        'hour' => $hour,
-        'minutes' => $minutes,
-        'seconds' => $seconds,
-        'season' => $season
-    ];
-}
 }

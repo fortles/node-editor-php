@@ -68,6 +68,7 @@ class NodeEnvironment {
                 }
                 if(!isset($type[$nodeData['type']])){
                     $type[$nodeData['type']] = [
+                        'description' => $node->getDescription(),
                         'in' => $node->in,
                         'out'=> $node->out
                     ];
@@ -87,6 +88,7 @@ class NodeEnvironment {
                 'name' => ''
             ]);
             return [
+                'description' => $n->getDescription(),
                 'in'  => $n->in,
                 'out' => $n->out
             ];
